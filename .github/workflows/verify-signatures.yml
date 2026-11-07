@@ -1,0 +1,27 @@
+name: verify-signatures
+
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify-signatures:
+    name: "verify signatures added in PR"
+    runs-on: ubuntu-26.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          # HEAD is the merge commit of the PR into the base branch.
+          # Its first parent (HEAD^1) is the tip of the base branch.
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Verify signatures
+        run: python3 -I contrib/verify_signatures.py --diff-base HEAD^1
